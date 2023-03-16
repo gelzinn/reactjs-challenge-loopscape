@@ -10,7 +10,8 @@ const SearchMap = () => {
     e.preventDefault();
 
     if (!search) {
-      alert ("Preencha a localização para pesquisar.")
+      alert ("Preencha a localização para pesquisar.");
+      inputRef.current?.focus();
       return;
     }
 
@@ -26,7 +27,7 @@ const SearchMap = () => {
           >
             <input
               type="text"
-              placeholder="Insira a localização aqui"
+              placeholder="Insira uma localização aqui."
               ref={inputRef}
               value={search}
               onChange={(e: ChangeEvent<HTMLInputElement>) => {

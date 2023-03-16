@@ -75,7 +75,8 @@ export const SearchWrapper = styled.div`
       height: 45px;
 
       background: transparent;
-      border: 1px solid black;
+      border: 1px black inset;
+      border-style: solid none solid solid;
       
       padding: .75rem 1rem;
       border-radius: 1rem 0 0 1rem;
@@ -115,7 +116,7 @@ export const SearchWrapper = styled.div`
       height: 45px;
 
       background: black;
-      border: 1px solid black;
+      border: 1px solid transparent;
 
       color: white;
       
