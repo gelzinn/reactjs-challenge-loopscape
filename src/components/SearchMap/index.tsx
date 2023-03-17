@@ -1,66 +1,239 @@
-import { MapContainer, SearchWrapper } from "./styles";
-import { ChangeEvent, FormEvent, useRef, useState } from "react";
+import { BookmarkSimple, ClockCounterClockwise, Gear, MagnifyingGlass, SmileyXEyes, X } from "phosphor-react";
+import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
+import { Modal } from "../Modal";
+import { MapContainer, Navbar } from "./styles";
 
 const SearchMap = () => {
+  const initialLocalStorageHistory: any = localStorage.getItem("geolocation-history") || [];
+
   const [location, setLocation] = useState<string>("");
   const [search, setSearch] = useState<string>("");
+  const [searchError, setSearchError] = useState<string | unknown>("");
+  
+  const [historyStorage, setHistoryStorage] = useState<any>(initialLocalStorageHistory)
+
+  const [modalsOpenned, setModalsOpenned] = useState({
+    history: false,
+    bookmarks: false,
+    custom: false
+  })
+
   const inputRef = useRef<HTMLInputElement>(null);
+  const inputWrapperRef = useRef<HTMLInputElement>(null);
+
+  const GoogleMapsKey = import.meta.env.VITE_GOOGLE_MAPS_API
+  
+  useEffect(() => {
+    if (historyStorage) {
+      // localStorage.setItem("geolocation-history", JSON.stringify(historyStorage?.map((item: string[]) => item)));
+      console.log(historyStorage)
+    }
+  }, [historyStorage])
 
   function handleSubmitLocation(e: FormEvent) {
     e.preventDefault();
 
     if (!search) {
-      alert ("Preencha a localização para pesquisar.");
       inputRef.current?.focus();
       return;
     }
 
+    const getLocationInfo = async () => {
+      try {
+        const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${search}&key=${GoogleMapsKey}`)
+        const data = await res.json()
+
+        setHistoryStorage([...historyStorage, {
+          id: uuidv4(),
+          search: search,
+          address: data.results[0].formatted_address,
+          placeId: data.results[0].place_id,
+          coords: {
+            lat: data.results[0].geometry.location.lat,
+            lng: data.results[0].geometry.location.lng,
+          },
+          timestamp: new Date()
+        }])
+
+        // localStorage.setItem("geolocation-history", JSON.stringify(historyStorage?.map((item: any) => item)));
+      } catch (error) {
+        setSearchError(error);
+      }
+    }
+
+    getLocationInfo();
     setLocation(search);
+  }
+
+  function handleClearSearchAndLocation () {
+    setSearch("")
+    setLocation("")
   }
 
   return (
     <>
-      <SearchWrapper>
-        <form className="container" onSubmit={handleSubmitLocation}>
+      {modalsOpenned && (
+        <>
+          {(() => {
+            if (modalsOpenned.history) {
+              return (
+                <Modal title="Recentes" onClose={() => {
+                  setModalsOpenned({
+                    ...modalsOpenned,
+                    history: !modalsOpenned.history
+                  })
+                }}>
+                  {historyStorage && historyStorage.length > 0 ? (
+                    <ul>
+                      {Array.from(historyStorage).sort().map(({ search, address, id }: any) => {
+                        return (
+                          <a
+                            key={id}
+                            id={id}
+                            onClick={() => {
+                              if (search != search) {
+                                setModalsOpenned({
+                                  ...modalsOpenned,
+                                  history: !modalsOpenned.history
+                                })
+                                setSearch(search)
+                                setLocation(search)
+                              }
+                            }}
+                          >
+                            <div className="info">
+                              <span>{search}</span>
+                              <p>{address}</p>
+                            </div>
+                            <button onClick={() => {
+                              setHistoryStorage(historyStorage.filter((item: any) => item.id != id))
+                            }}>
+                              <X />
+                            </button>
+                          </a>
+                        )
+                      })}
+                    </ul>
+                  ) : (
+                    <div className="warning">
+                      <SmileyXEyes weight="light" />
+                      <div className="message">
+                        <strong>Não há buscas recentes disponíveis.</strong>
+                        <p>Faça uma agora!</p>
+                      </div>
+                    </div>
+                  )}
+                </Modal>
+              )
+            }
+
+            if (modalsOpenned.bookmarks) {
+              return (
+                <Modal title="Salvos">
+                  <div className="warning">
+                      <SmileyXEyes weight="light" />
+                      <div className="message">
+                        <strong>Não há buscas favoritas disponíveis.</strong>
+                        <p>Salve uma agora!</p>
+                      </div>
+                    </div>
+                </Modal>
+              )
+            }
+
+            if (modalsOpenned.custom) {
+              return (
+                <Modal title="Personalizar" right>
+                  <p>Em breve</p>
+                </Modal>
+              )
+            }
+          })()}
+        </>
+      )}
+      <Navbar>
+        {location && (
+          <div className="save-location">{location}</div>
+        )}
+        <a
+          className={modalsOpenned.history ? "active" : ""}
+          onClick={() => {
+            setModalsOpenned({
+              bookmarks: false,
+              custom: false,
+              history: !modalsOpenned.history
+            })
+          }}
+        >
+          <ClockCounterClockwise />
+          <span>Recentes</span>
+        </a>
+        <a
+          className={modalsOpenned.bookmarks ? "active" : ""}
+          onClick={() => {
+            setModalsOpenned({
+              bookmarks: !modalsOpenned.bookmarks,
+              custom: false,
+              history: false
+            })
+          }}
+        >
+          <BookmarkSimple />
+          <span>Salvos</span>
+        </a>
+        <form onSubmit={handleSubmitLocation}>
           <div
+            ref={inputWrapperRef}
             onClick={() => inputRef.current?.focus()}
           >
             <input
               type="text"
-              placeholder="Insira uma localização aqui."
+              placeholder="Insira uma localização aqui"
+              required
               ref={inputRef}
               value={search}
+              onInput={(e: ChangeEvent<HTMLInputElement>) => e.target.setCustomValidity('')}
+              onInvalid={(e: ChangeEvent<HTMLInputElement>) => e.target.setCustomValidity('Por favor, preencha uma localização.')}
               onChange={(e: ChangeEvent<HTMLInputElement>) => {
                 setSearch(e.target.value);
               }}
             />
-            {search && (
-              <button onClick={() => {
-                setLocation("")
-                setSearch("")
-              }}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 256 256">
-                  <path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z" />
-                </svg>
+            {location && search.length > 0 && (
+              <button onClick={handleClearSearchAndLocation}>
+                <X />
               </button>
             )}
+            <button type="submit" disabled={location === search}>
+              <MagnifyingGlass />
+            </button>
           </div>
-          <button type="submit">
-            Pesquisar
-          </button>
         </form>
-      </SearchWrapper>
+        <a
+          className={modalsOpenned.custom ? "active" : ""}
+          onClick={() => {
+            setModalsOpenned({
+              bookmarks: false,
+              custom: !modalsOpenned.custom,
+              history: false
+            })
+          }}
+        >
+          <Gear />
+          <span>Personalizar</span>
+        </a>
+      </Navbar>
       <MapContainer>
         <iframe
+          frameBorder="0"
           loading="lazy"
           allowFullScreen
           referrerPolicy="no-referrer-when-downgrade"
+          id="google-maps"
           src={
             location ?
-            `https://www.google.com/maps/embed/v1/place?key=AIzaSyB2biQd8aXsBGvnhDNVLGutoZHUo5Z8G68
-            &q=${location}` :
-            `https://www.google.com/maps/embed/v1/place?key=AIzaSyB2biQd8aXsBGvnhDNVLGutoZHUo5Z8G68
-            &q=Rua Campos Salles, 865, 17201-020, Jaú–SP`
+            `https://www.google.com/maps/embed/v1/place?key=${GoogleMapsKey}&q=${location}` :
+            `https://www.google.com/maps/embed/v1/place?key=${GoogleMapsKey}&q=Rua Campos Salles, 865, 17201-020, Jaú–SP`
           }>
         </iframe>
       </MapContainer>
