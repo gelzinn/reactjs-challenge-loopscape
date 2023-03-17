@@ -44,6 +44,7 @@ export const ModalWrapper = styled.div<ModalProps>`
       width: 100%;
 
       border-bottom: 1px solid #2F2F2F;
+      color: var(--gray-100);
     }
   }
 
@@ -123,6 +124,7 @@ export const ModalWrapper = styled.div<ModalProps>`
         padding: .5rem;
 
         cursor: pointer;
+        z-index: 2;
 
         > svg {
           width: 1.25rem;

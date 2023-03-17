@@ -222,14 +222,12 @@ export const Navbar = styled.div`
 
   .save-location {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
 
-    height: 80px;
+    height: 100%;
+    max-height: 64px;
     width: fit-content;
-
-    background: var(--gray-800);
-    border-top: 1px solid var(--gray-500);
 
     position: absolute;
     bottom: 80px;
@@ -238,10 +236,64 @@ export const Navbar = styled.div`
 
     z-index: 10;
 
-    display: none;
+    .location {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 0 2rem;
+
+      text-transform: capitalize;
+
+      > span {
+        color: var(--gray-100)
+      }
+
+      > p {
+        color: var(--gray-400);
+      }
+    }
+
+    .save {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 0 .5rem;
+
+      width: 64px;
+      height: 64px;
+
+      background: transparent;
+      border: none;
+
+      cursor: pointer;
+
+      > svg {
+        color: var(--red);
+        font-size: 1.25rem;
+
+        transition: font-size .2s ease;
+      }
+    }
+
+    @media (min-width: 650px) {
+      background: var(--gray-800);
+      border-radius: 0 1rem 0 0;
+
+      .save {
+        border-left: 1px solid var(--gray-500);
+      }
+    }
 
     @media (max-width: 650px) {
-      display: none;
+      bottom: 160px;
+      right: 0;
+      left: unset;
+
+      .location {
+        display: none;
+      }
     }
   }
 

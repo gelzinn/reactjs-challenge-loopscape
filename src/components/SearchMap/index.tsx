@@ -1,4 +1,4 @@
-import { BookmarkSimple, ClockCounterClockwise, Gear, MagnifyingGlass, SmileyXEyes, X } from "phosphor-react";
+import { BookmarkSimple, ClockCounterClockwise, Gear, Heart, MagnifyingGlass, SmileyXEyes, X } from "phosphor-react";
 import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { Modal } from "../Modal";
@@ -27,9 +27,14 @@ const SearchMap = () => {
   useEffect(() => {
     if (historyStorage) {
       // localStorage.setItem("geolocation-history", JSON.stringify(historyStorage?.map((item: string[]) => item)));
-      console.log(historyStorage)
+      // console.log(historyStorage)
     }
   }, [historyStorage])
+
+  useEffect(() => {
+    if (!searchError) return
+    console.log(searchError);
+  }, [searchError])
 
   function handleSubmitLocation(e: FormEvent) {
     e.preventDefault();
@@ -55,6 +60,8 @@ const SearchMap = () => {
           },
           timestamp: new Date()
         }])
+
+        window.history.replaceState(null, `${search} — Geolocation`, `/&search=${search}?lat=${data.results[0].geometry.location.lat}?lng=${data.results[0].geometry.location.lng}`)
 
         // localStorage.setItem("geolocation-history", JSON.stringify(historyStorage?.map((item: any) => item)));
       } catch (error) {
@@ -92,21 +99,22 @@ const SearchMap = () => {
                             key={id}
                             id={id}
                             onClick={() => {
-                              if (search != search) {
-                                setModalsOpenned({
-                                  ...modalsOpenned,
-                                  history: !modalsOpenned.history
-                                })
-                                setSearch(search)
-                                setLocation(search)
-                              }
+                              setModalsOpenned({
+                                ...modalsOpenned,
+                                history: !modalsOpenned.history
+                              })
+                              setSearch(search)
+                              setLocation(search)
+
+                              window.history.pushState({}, document.title, "/");
                             }}
                           >
                             <div className="info">
                               <span>{search}</span>
                               <p>{address}</p>
                             </div>
-                            <button onClick={() => {
+                            <button onClick={(e) => {
+                              e.stopPropagation(); 
                               setHistoryStorage(historyStorage.filter((item: any) => item.id != id))
                             }}>
                               <X />
@@ -154,7 +162,15 @@ const SearchMap = () => {
       )}
       <Navbar>
         {location && (
-          <div className="save-location">{location}</div>
+          <div className="save-location">
+            <div className="location">
+              <span>{location}</span>
+              {/* <p>{location}</p> */}
+            </div>
+            <button className="save">
+              <Heart />
+            </button>
+          </div>
         )}
         <a
           className={modalsOpenned.history ? "active" : ""}
