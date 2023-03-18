@@ -1,8 +1,9 @@
 import styled from 'styled-components';
 
 export const SearchMapContainer = styled.main`
-  height: calc(100vh - calc(100vh - 100%));
-  min-height: fill-available;
+  /* height: calc(100vh - calc(100vh - 100%)); */
+  height: -webkit-fill-available;
+  /* height: 100svh; */
 `
 
 export const MapContainer = styled.div`
@@ -27,7 +28,7 @@ export const MapContainer = styled.div`
   background: var(--gray-800);
 `
 
-export const Navbar = styled.div`
+export const Navbar = styled.nav`
   display: flex;
   justify-content: space-between;
   align-items: center;

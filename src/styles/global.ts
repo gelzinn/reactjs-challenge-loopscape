@@ -24,6 +24,10 @@ const GlobalStyle = createGlobalStyle`
     }
   }
 
+  html {
+    height: -webkit-fill-available;
+  }
+
   body {
     position: relative;
 
