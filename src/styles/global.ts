@@ -29,9 +29,10 @@ const GlobalStyle = createGlobalStyle`
   }
 
   body {
-    position: relative;
-
     height: 100vh;
+    height: -webkit-fill-available;
+    
+    position: relative;
     overflow: hidden;
 
     &[data-theme="dark"] {
