@@ -203,6 +203,20 @@ const SearchMap = () => {
           })()}
         </>
       )}
+      <MapContainer>
+        <iframe
+          frameBorder="0"
+          loading="lazy"
+          allowFullScreen
+          referrerPolicy="no-referrer-when-downgrade"
+          id="google-maps"
+          src={
+            location ?
+            `https://www.google.com/maps/embed/v1/place?key=${GoogleMapsKey}&q=${location}` :
+            `https://www.google.com/maps/embed/v1/place?key=${GoogleMapsKey}&q=Rua Campos Salles, 865, 17201-020, Jaú–SP`
+          }>
+        </iframe>
+      </MapContainer>
       <Navbar>
         {location && (
           <div className="save-location">
@@ -282,20 +296,6 @@ const SearchMap = () => {
           <span>Personalizar</span>
         </a>
       </Navbar>
-      <MapContainer>
-        <iframe
-          frameBorder="0"
-          loading="lazy"
-          allowFullScreen
-          referrerPolicy="no-referrer-when-downgrade"
-          id="google-maps"
-          src={
-            location ?
-            `https://www.google.com/maps/embed/v1/place?key=${GoogleMapsKey}&q=${location}` :
-            `https://www.google.com/maps/embed/v1/place?key=${GoogleMapsKey}&q=Rua Campos Salles, 865, 17201-020, Jaú–SP`
-          }>
-        </iframe>
-      </MapContainer>
     </SearchMapContainer>
   )
 }

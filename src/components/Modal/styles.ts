@@ -7,7 +7,7 @@ export const ModalWrapper = styled.div<ModalProps>`
   justify-content: flex-start;
   align-items: center;
   
-  height: calc(-webkit-fill-available - calc(80px - 2px));
+  height: calc(100svh - calc(80px - 2px));
   width: 50vw;
   max-width: 400px;
 
