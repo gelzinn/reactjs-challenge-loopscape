@@ -1,4 +1,4 @@
-import { BookmarkSimple, ClockCounterClockwise, Gear, Heart, MagnifyingGlass, SmileyXEyes, X } from "phosphor-react";
+import { BookmarkSimple, ClockCounterClockwise, Gear, Heart, HeartBreak, MagnifyingGlass, Moon, SmileyXEyes, Sun, X } from "phosphor-react";
 import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { Modal } from "../Modal";
@@ -10,6 +10,7 @@ const SearchMap = () => {
   const [location, setLocation] = useState<string>("");
   const [search, setSearch] = useState<string>("");
   const [searchError, setSearchError] = useState<string | unknown>("");
+  const [recentSearch, setRecentSearch] = useState<any>();
   
   const [historyStorage, setHistoryStorage] = useState<any>(initialLocalStorageHistory)
 
@@ -51,7 +52,7 @@ const SearchMap = () => {
 
         setHistoryStorage([...historyStorage, {
           id: uuidv4(),
-          search: search,
+          search,
           address: data.results[0].formatted_address,
           placeId: data.results[0].place_id,
           coords: {
@@ -66,6 +67,8 @@ const SearchMap = () => {
         // localStorage.setItem("geolocation-history", JSON.stringify(historyStorage?.map((item: any) => item)));
       } catch (error) {
         setSearchError(error);
+      } finally {
+        console.log(Array.from(historyStorage.reverse()[0]))
       }
     }
 
@@ -85,7 +88,7 @@ const SearchMap = () => {
           {(() => {
             if (modalsOpenned.history) {
               return (
-                <Modal title="Recentes" onClose={() => {
+                <Modal title="Recentes" label={`${historyStorage.length} de 20`} onClose={() => {
                   setModalsOpenned({
                     ...modalsOpenned,
                     history: !modalsOpenned.history
@@ -93,7 +96,7 @@ const SearchMap = () => {
                 }}>
                   {historyStorage && historyStorage.length > 0 ? (
                     <ul>
-                      {Array.from(historyStorage).sort().map(({ search, address, id }: any) => {
+                      {Array.from(historyStorage).reverse().map(({ search, address, id }: any, index: number) => {
                         return (
                           <a
                             key={id}
@@ -110,8 +113,9 @@ const SearchMap = () => {
                             }}
                           >
                             <div className="info">
-                              <span>{search}</span>
+                              <span>{address.substring(0, address.indexOf(","))}</span>
                               <p>{address}</p>
+                              <pre>{index + 1}</pre>
                             </div>
                             <button onClick={(e) => {
                               e.stopPropagation(); 
@@ -138,9 +142,9 @@ const SearchMap = () => {
 
             if (modalsOpenned.bookmarks) {
               return (
-                <Modal title="Salvos">
+                <Modal title="Salvos" label={`0 de 20`}>
                   <div className="warning">
-                      <SmileyXEyes weight="light" />
+                      <HeartBreak weight="light" />
                       <div className="message">
                         <strong>Não há buscas favoritas disponíveis.</strong>
                         <p>Salve uma agora!</p>
@@ -151,9 +155,48 @@ const SearchMap = () => {
             }
 
             if (modalsOpenned.custom) {
+              const body = document.querySelector("body");
+              const getTheme = body?.getAttribute("data-theme");
+
+              function handleThemeSwitcher (themeButton: string) {
+                const darkThemeButton = document.querySelector("#theme-switcher-btn-dark");
+                const lightThemeButton = document.querySelector("#theme-switcher-btn-light");
+
+                if (themeButton == "dark") {
+                  body?.setAttribute("data-theme", "dark");
+
+                  lightThemeButton?.classList.remove("selected");
+                  darkThemeButton?.classList.add("selected");
+                }
+
+                if (themeButton == "light") {
+                  body?.setAttribute("data-theme", "light");
+
+                  darkThemeButton?.classList.remove("selected");
+                  lightThemeButton?.classList.add("selected");
+                }
+              }
+
               return (
                 <Modal title="Personalizar" right>
-                  <p>Em breve</p>
+                  <div className="theme-switcher">
+                    <button
+                      id="theme-switcher-btn-dark"
+                      className={getTheme == "dark" ? "selected" : ""}
+                      onClick={() => handleThemeSwitcher("dark")}
+                    >
+                      <Moon />
+                      <p>Escuro</p>
+                    </button>
+                    <button
+                      id="theme-switcher-btn-light"
+                      className={getTheme == "light" ? "selected" : ""}
+                      onClick={() => handleThemeSwitcher("light")}
+                    >
+                      <Sun />
+                      <p>Claro</p>
+                    </button>
+                  </div>
                 </Modal>
               )
             }

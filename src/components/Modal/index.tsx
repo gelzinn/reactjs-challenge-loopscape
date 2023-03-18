@@ -7,13 +7,19 @@ export const Modal = ({
   title,
   close,
   onClose,
-  right
+  right,
+  label
 }: ModalProps) => {
   return (
     <ModalWrapper right={right} onClose={onClose}>
       {title && (
         <div className="title">
-          <span>{title}</span>
+          <div className="content">
+            <span>{title}</span>
+            {label && (
+              <div className="label">{label}</div>
+            )}
+          </div>
         </div>
       )}
       {close && (

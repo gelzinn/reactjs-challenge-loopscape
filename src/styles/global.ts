@@ -53,6 +53,23 @@ const GlobalStyle = createGlobalStyle`
 
     --red: #FF2D2D;
   }
+
+  [data-theme="light"] {
+    :root {
+      --white: white;
+      --gray-100: #F1F1F1;
+      --gray-200: #E3E3E3;
+      --gray-300: #D3D3D3;
+      --gray-400: #7A7A7A;
+      --gray-500: #2F2F2F;
+      --gray-600: #252525;
+      --gray-700: #161616;
+      --gray-800: #121214;
+      --black: black;
+
+      --red: green;
+    }
+  }
 `;
  
 export default GlobalStyle;

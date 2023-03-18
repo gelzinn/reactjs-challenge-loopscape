@@ -30,9 +30,9 @@ export const ModalWrapper = styled.div<ModalProps>`
 
     width: 100%;
 
-    > span {
+    > .content {
       display: flex;
-      justify-content: flex-start;
+      justify-content: space-between;
       align-items: center;
 
       font-size: 1.5rem;
@@ -45,6 +45,21 @@ export const ModalWrapper = styled.div<ModalProps>`
 
       border-bottom: 1px solid #2F2F2F;
       color: var(--gray-100);
+
+      > .label {
+        font-size: .75rem;
+        font-weight: normal;
+
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        padding: .25rem .75rem;
+
+        background: var(--gray-800);
+        border: 1px solid var(--gray-500);
+        border-radius: 9999px;
+      }
     }
   }
 
@@ -87,12 +102,14 @@ export const ModalWrapper = styled.div<ModalProps>`
         align-items: flex-start;
         align-self: stretch;
 
+        position: relative;
+
         width: calc(100% - 2rem);
         gap: .5rem;
         
         > span {
           color: var(--gray-300);
-          text-transform: capitalize;
+          /* text-transform: capitalize; */
         }
 
         > p {
@@ -110,6 +127,26 @@ export const ModalWrapper = styled.div<ModalProps>`
           text-overflow: ellipsis;
 
           overflow: hidden;
+        }
+
+        > pre {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          
+          position: absolute;
+          top: -1.75rem;
+          left: -1.75rem;
+
+          width: .75rem;
+          height: .75rem;
+          padding: .75rem;
+
+          font-size: .75rem;
+
+          background: var(--gray-800);
+          outline: 2px solid var(--gray-500);
+          border-radius: 50%;
         }
       }
 
@@ -179,6 +216,54 @@ export const ModalWrapper = styled.div<ModalProps>`
       flex-direction: column;
       justify-content: center;
       align-items: center;
+    }
+  }
+
+  .theme-switcher {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    padding: 0 1rem;
+    /* gap: .25rem; */
+
+    overflow: hidden;
+
+    > button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      gap: 1rem;
+
+      width: 100%;
+      min-height: 50px;
+      height: 100%;
+      max-height: 50px;
+
+      background: var(--gray-700);
+      color: var(--gray-100);
+      border: unset;
+
+      cursor: pointer;
+
+      &.selected {
+        background: var(--gray-500);
+      }
+
+      &:first-child {
+        border-radius: 1rem 0 0 1rem;
+      }
+
+      &:last-child {
+        border-radius: 0 1rem 1rem 0;
+      }
+
+      > svg {
+        width: 1.5rem;
+        height: 1.5rem;
+      }
     }
   }
 
