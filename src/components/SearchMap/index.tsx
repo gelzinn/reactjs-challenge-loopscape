@@ -2,7 +2,7 @@ import { BookmarkSimple, ClockCounterClockwise, Gear, Heart, HeartBreak, Magnify
 import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { Modal } from "../Modal";
-import { MapContainer, Navbar } from "./styles";
+import { MapContainer, Navbar, SearchMapContainer } from "./styles";
 
 const SearchMap = () => {
   const initialLocalStorageHistory: any = localStorage.getItem("geolocation-history") || [];
@@ -82,7 +82,7 @@ const SearchMap = () => {
   }
 
   return (
-    <>
+    <SearchMapContainer>
       {modalsOpenned && (
         <>
           {(() => {
@@ -296,7 +296,7 @@ const SearchMap = () => {
           }>
         </iframe>
       </MapContainer>
-    </>
+    </SearchMapContainer>
   )
 }
 

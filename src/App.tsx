@@ -43,6 +43,14 @@ function App() {
 
     updateColorScheme();
   }, [window.matchMedia])
+  
+  useEffect(() => {
+    window.addEventListener("load",function() {
+      setTimeout(function(){
+          window.scrollTo(0, 1);
+      }, 10);
+  });
+  }, [])
 
   return (
     <>

@@ -1,5 +1,10 @@
 import styled from 'styled-components';
 
+export const SearchMapContainer = styled.main`
+  height: calc(100vh - calc(100vh - 100%));
+  min-height: fill-available;
+`
+
 export const MapContainer = styled.div`
   display: flex;
   justify-content: center;
@@ -64,14 +69,6 @@ export const Navbar = styled.div`
       color: var(--gray-400);
     }
 
-    &:hover {
-      color: var(--gray-300);
-
-      > svg {
-        color: var(--gray-300);
-      }
-    }
-
     &.active {
       color: var(--gray-100);
 
@@ -93,6 +90,16 @@ export const Navbar = styled.div`
 
       @media (max-width: 978px) {
         display: none;
+      }
+    }
+
+    @media (min-width: 650px) {
+      &:hover {
+        color: var(--gray-300);
+
+        > svg {
+          color: var(--gray-300);
+        }
       }
     }
 
