@@ -95,11 +95,6 @@ const SearchMap = () => {
     setLocation(search);
   }
 
-  function handleClearSearchAndLocation () {
-    setSearch("")
-    setLocation("")
-  }
-
   function handleSaveLocation (id: string) {
     if (bookmarksStorage.some((bookmark: any) => bookmark.id === recentSearch.id)) {
       setBookmarksStorage(bookmarksStorage.filter((item: any) => item.id != id));
@@ -108,6 +103,11 @@ const SearchMap = () => {
       setBookmarksStorage([...bookmarksStorage, recentSearch]);
       return;
     }
+  }
+
+  function handleClearSearchAndLocation () {
+    setSearch("")
+    setLocation("")
   }
 
   return (
@@ -177,8 +177,8 @@ const SearchMap = () => {
                       {Array.from(bookmarksStorage).reverse().map(({ search, address, id }: any, index: number) => {
                         return (
                           <a
-                            key={recentSearch.id}
-                            id={recentSearch.id}
+                            key={id}
+                            id={id}
                             onClick={() => {
                               setModalsOpenned({
                                 ...modalsOpenned,
@@ -191,8 +191,8 @@ const SearchMap = () => {
                             }}
                           >
                             <div className="info">
-                              <span>{recentSearch.address.substring(0, recentSearch.address.indexOf(","))}</span>
-                              <p>{recentSearch.address}</p>
+                              <span>{address.substring(0, address.indexOf(","))}</span>
+                              <p>{address}</p>
                               <pre>{index + 1}</pre>
                             </div>
                             <button onClick={(e) => {
