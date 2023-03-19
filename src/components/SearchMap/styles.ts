@@ -254,11 +254,13 @@ export const Navbar = styled.nav`
       text-transform: capitalize;
 
       > span {
-        color: var(--gray-100)
+        color: var(--gray-100);
+        font-size: 1rem;
       }
 
       > p {
         color: var(--gray-400);
+        font-size: .75rem;
       }
     }
 

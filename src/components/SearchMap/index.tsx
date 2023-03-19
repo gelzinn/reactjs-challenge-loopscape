@@ -6,13 +6,15 @@ import { MapContainer, Navbar, SearchMapContainer } from "./styles";
 
 const SearchMap = () => {
   const initialLocalStorageHistory: any = localStorage.getItem("geolocation-history") || [];
+  const initialLocalStorageBookmarks: any = localStorage.getItem("geolocation-bookmarks") || [];
 
   const [location, setLocation] = useState<string>("");
   const [search, setSearch] = useState<string>("");
   const [searchError, setSearchError] = useState<string | unknown>("");
-  const [recentSearch, setRecentSearch] = useState<any>();
+  const [recentSearch, setRecentSearch] = useState<any | undefined>([]);
   
   const [historyStorage, setHistoryStorage] = useState<any>(initialLocalStorageHistory)
+  const [bookmarksStorage, setBookmarksStorage] = useState<any>(initialLocalStorageBookmarks)
 
   const [modalsOpenned, setModalsOpenned] = useState({
     history: false,
@@ -37,8 +39,15 @@ const SearchMap = () => {
     console.log(searchError);
   }, [searchError])
 
+  useEffect(() => {
+    if (bookmarksStorage) {
+      // console.log(bookmarksStorage)
+    }
+  }, [bookmarksStorage])
+
   function handleSubmitLocation(e: FormEvent) {
     e.preventDefault();
+    setRecentSearch(undefined);
 
     if (!search) {
       inputRef.current?.focus();
@@ -61,14 +70,24 @@ const SearchMap = () => {
           },
           timestamp: new Date()
         }])
+        
+        setRecentSearch({
+          id: uuidv4(),
+          search,
+          address: data.results[0].formatted_address,
+          placeId: data.results[0].place_id,
+          coords: {
+            lat: data.results[0].geometry.location.lat,
+            lng: data.results[0].geometry.location.lng,
+          },
+          timestamp: new Date()
+        })
 
         window.history.replaceState(null, `${search} — Geolocation`, `/&search=${search}?lat=${data.results[0].geometry.location.lat}?lng=${data.results[0].geometry.location.lng}`)
 
         // localStorage.setItem("geolocation-history", JSON.stringify(historyStorage?.map((item: any) => item)));
       } catch (error) {
         setSearchError(error);
-      } finally {
-        console.log(Array.from(historyStorage.reverse()[0]))
       }
     }
 
@@ -79,6 +98,16 @@ const SearchMap = () => {
   function handleClearSearchAndLocation () {
     setSearch("")
     setLocation("")
+  }
+
+  function handleSaveLocation (id: string) {
+    if (bookmarksStorage.some((bookmark: any) => bookmark.id === recentSearch.id)) {
+      setBookmarksStorage(bookmarksStorage.filter((item: any) => item.id != id));
+      return;
+    } else {
+      setBookmarksStorage([...bookmarksStorage, recentSearch]);
+      return;
+    }
   }
 
   return (
@@ -142,14 +171,49 @@ const SearchMap = () => {
 
             if (modalsOpenned.bookmarks) {
               return (
-                <Modal title="Salvos" label={`0 de 20`}>
-                  <div className="warning">
+                <Modal title="Salvos" label={`${bookmarksStorage.length} de 20`}>
+                  {bookmarksStorage && bookmarksStorage.length > 0 ? (
+                    <ul>
+                      {Array.from(bookmarksStorage).reverse().map(({ search, address, id }: any, index: number) => {
+                        return (
+                          <a
+                            key={recentSearch.id}
+                            id={recentSearch.id}
+                            onClick={() => {
+                              setModalsOpenned({
+                                ...modalsOpenned,
+                                bookmarks: !modalsOpenned.bookmarks
+                              })
+                              setSearch(search)
+                              setLocation(search)
+
+                              window.history.pushState({}, document.title, "/");
+                            }}
+                          >
+                            <div className="info">
+                              <span>{recentSearch.address.substring(0, recentSearch.address.indexOf(","))}</span>
+                              <p>{recentSearch.address}</p>
+                              <pre>{index + 1}</pre>
+                            </div>
+                            <button onClick={(e) => {
+                              e.stopPropagation(); 
+                              setBookmarksStorage(bookmarksStorage.filter((item: any) => item.id != id))
+                            }}>
+                              <X />
+                            </button>
+                          </a>
+                        )
+                      })}
+                    </ul>
+                  ) : (
+                    <div className="warning">
                       <HeartBreak weight="light" />
                       <div className="message">
                         <strong>Não há buscas favoritas disponíveis.</strong>
                         <p>Salve uma agora!</p>
                       </div>
                     </div>
+                  )}
                 </Modal>
               )
             }
@@ -203,6 +267,7 @@ const SearchMap = () => {
           })()}
         </>
       )}
+
       <MapContainer>
         <iframe
           frameBorder="0"
@@ -217,15 +282,21 @@ const SearchMap = () => {
           }>
         </iframe>
       </MapContainer>
+
       <Navbar>
-        {location && (
+        {location && recentSearch && (
           <div className="save-location">
             <div className="location">
-              <span>{location}</span>
-              {/* <p>{location}</p> */}
+              <span>{recentSearch.address.substring(0, recentSearch.address.indexOf(","))}</span>
+              <p>{recentSearch.address}</p>
             </div>
-            <button className="save">
-              <Heart />
+            <button
+              className="save"
+              onClick={() => {
+                handleSaveLocation(recentSearch.id)
+              }}
+            >
+              {bookmarksStorage.some((bookmark: any) => bookmark.id === recentSearch.id) ? <Heart weight="fill" /> : <Heart />}
             </button>
           </div>
         )}
