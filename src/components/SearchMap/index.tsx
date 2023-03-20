@@ -7,7 +7,7 @@ import { MapContainer, Navbar, SearchMapContainer } from "./styles";
 
 const SearchMap = () => {
   const initialLocalStorageHistory: string | [] = localStorage.getItem("geolocation-history") || [];
-  const initialLocalStorageBookmarks: string | [] = localStorage.getItem("geolocation-bookmark") || [];
+  const initialLocalStorageBookmark: string | [] = localStorage.getItem("geolocation-bookmark") || [];
   
   const [location, setLocation] = useState<string>("");
   const [search, setSearch] = useState<string>("");
@@ -17,7 +17,7 @@ const SearchMap = () => {
   const [searchButtonLoading, setSearchButtonLoading] = useState<boolean>(false);
   
   const [historyStorage, setHistoryStorage] = useState<any>(initialLocalStorageHistory)
-  const [bookmarksStorage, setBookmarksStorage] = useState<any>(initialLocalStorageBookmarks)
+  const [bookmarksStorage, setBookmarksStorage] = useState<any>(initialLocalStorageBookmark)
 
   const [modalsOpenned, setModalsOpenned] = useState({
     history: false,
@@ -39,11 +39,11 @@ const SearchMap = () => {
       }
     }
 
-    if (initialLocalStorageBookmarks) {
-      if (typeof initialLocalStorageBookmarks === 'string') {
-        setBookmarksStorage(JSON.parse(initialLocalStorageBookmarks) as string);
+    if (initialLocalStorageBookmark) {
+      if (typeof initialLocalStorageBookmark === 'string') {
+        setBookmarksStorage(JSON.parse(initialLocalStorageBookmark) as string);
       } else {
-        setBookmarksStorage(initialLocalStorageBookmarks as []);
+        setBookmarksStorage(initialLocalStorageBookmark as []);
       }
     }
   }, [])
@@ -139,10 +139,14 @@ const SearchMap = () => {
   function handleClearStorage(storage: string) {
     switch (storage) {
       case "bookmark":
+        if (!initialLocalStorageBookmark) return;
+
         setBookmarksStorage([]);
         localStorage.deleteItem("geolocation-bookmark")
         break;
       case "history":
+        if (!initialLocalStorageHistory) return;
+
         setHistoryStorage([]);
         localStorage.deleteItem("geolocation-history")
         break;
