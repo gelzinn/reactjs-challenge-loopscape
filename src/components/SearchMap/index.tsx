@@ -1,17 +1,20 @@
-import { BookmarkSimple, ClockCounterClockwise, Gear, Heart, HeartBreak, MagnifyingGlass, Moon, SmileyXEyes, Sun, X } from "phosphor-react";
+import { BookmarkSimple, ClockCounterClockwise, Gear, Heart, HeartBreak, MagnifyingGlass, Moon, SmileyXEyes, Sun, TrashSimple, X } from "phosphor-react";
 import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { LocationResponse } from "../../models/localStorage";
 import { Modal } from "../Modal";
 import { MapContainer, Navbar, SearchMapContainer } from "./styles";
 
 const SearchMap = () => {
-  const initialLocalStorageHistory: any = localStorage.getItem("geolocation-history") || [];
-  const initialLocalStorageBookmarks: any = localStorage.getItem("geolocation-bookmarks") || [];
-
+  const initialLocalStorageHistory: string | [] = localStorage.getItem("geolocation-history") || [];
+  const initialLocalStorageBookmarks: string | [] = localStorage.getItem("geolocation-bookmark") || [];
+  
   const [location, setLocation] = useState<string>("");
   const [search, setSearch] = useState<string>("");
   const [searchError, setSearchError] = useState<string | unknown>("");
-  const [recentSearch, setRecentSearch] = useState<any | undefined>([]);
+  const [recentSearch, setRecentSearch] = useState<LocationResponse | null>();
+
+  const [searchButtonLoading, setSearchButtonLoading] = useState<boolean>(false);
   
   const [historyStorage, setHistoryStorage] = useState<any>(initialLocalStorageHistory)
   const [bookmarksStorage, setBookmarksStorage] = useState<any>(initialLocalStorageBookmarks)
@@ -26,28 +29,45 @@ const SearchMap = () => {
   const inputWrapperRef = useRef<HTMLInputElement>(null);
 
   const GoogleMapsKey = import.meta.env.VITE_GOOGLE_MAPS_API
-  
+
+  useEffect(() => {
+    if (initialLocalStorageHistory) {
+      if (typeof initialLocalStorageHistory === 'string') {
+        setHistoryStorage(JSON.parse(initialLocalStorageHistory) as string);
+      } else {
+        setHistoryStorage(initialLocalStorageHistory as []);
+      }
+    }
+
+    if (initialLocalStorageBookmarks) {
+      if (typeof initialLocalStorageBookmarks === 'string') {
+        setBookmarksStorage(JSON.parse(initialLocalStorageBookmarks) as string);
+      } else {
+        setBookmarksStorage(initialLocalStorageBookmarks as []);
+      }
+    }
+  }, [])
+
   useEffect(() => {
     if (historyStorage) {
-      // localStorage.setItem("geolocation-history", JSON.stringify(historyStorage?.map((item: string[]) => item)));
-      // console.log(historyStorage)
+      localStorage.setItem("geolocation-history", JSON.stringify(historyStorage));
     }
   }, [historyStorage])
+
+  useEffect(() => {
+    if (bookmarksStorage) {
+      localStorage.setItem("geolocation-bookmark", JSON.stringify(bookmarksStorage));
+    }
+  }, [bookmarksStorage])
 
   useEffect(() => {
     if (!searchError) return
     console.log(searchError);
   }, [searchError])
 
-  useEffect(() => {
-    if (bookmarksStorage) {
-      // console.log(bookmarksStorage)
-    }
-  }, [bookmarksStorage])
-
   function handleSubmitLocation(e: FormEvent) {
     e.preventDefault();
-    setRecentSearch(undefined);
+    setRecentSearch(null);
 
     if (!search) {
       inputRef.current?.focus();
@@ -56,6 +76,8 @@ const SearchMap = () => {
 
     const getLocationInfo = async () => {
       try {
+        setSearchButtonLoading(true)
+
         const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${search}&key=${GoogleMapsKey}`)
         const data = await res.json()
 
@@ -68,7 +90,7 @@ const SearchMap = () => {
             lat: data.results[0].geometry.location.lat,
             lng: data.results[0].geometry.location.lng,
           },
-          timestamp: new Date()
+          timestamp: new Date().toISOString(),
         }])
         
         setRecentSearch({
@@ -80,14 +102,16 @@ const SearchMap = () => {
             lat: data.results[0].geometry.location.lat,
             lng: data.results[0].geometry.location.lng,
           },
-          timestamp: new Date()
+          timestamp: new Date().toISOString(),
         })
 
-        window.history.replaceState(null, `${search} — Geolocation`, `/&search=${search}?lat=${data.results[0].geometry.location.lat}?lng=${data.results[0].geometry.location.lng}`)
+        // window.history.replaceState(null, `${search} — Geolocation`, `/&search=${search}?lat=${data.results[0].geometry.location.lat}?lng=${data.results[0].geometry.location.lng}`)
 
         // localStorage.setItem("geolocation-history", JSON.stringify(historyStorage?.map((item: any) => item)));
       } catch (error) {
         setSearchError(error);
+      } finally {
+        setSearchButtonLoading(false)
       }
     }
 
@@ -96,8 +120,10 @@ const SearchMap = () => {
   }
 
   function handleSaveLocation (id: string) {
+    if (!recentSearch || !bookmarksStorage) return;
+
     if (bookmarksStorage.some((bookmark: any) => bookmark.id === recentSearch.id)) {
-      setBookmarksStorage(bookmarksStorage.filter((item: any) => item.id != id));
+      setBookmarksStorage(bookmarksStorage?.filter((item: any) => item.id != id));
       return;
     } else {
       setBookmarksStorage([...bookmarksStorage, recentSearch]);
@@ -110,6 +136,19 @@ const SearchMap = () => {
     setLocation("")
   }
 
+  function handleClearStorage(storage: string) {
+    switch (storage) {
+      case "bookmark":
+        setBookmarksStorage([]);
+        localStorage.deleteItem("geolocation-bookmark")
+        break;
+      case "history":
+        setHistoryStorage([]);
+        localStorage.deleteItem("geolocation-history")
+        break;
+    }
+  }
+
   return (
     <SearchMapContainer>
       {modalsOpenned && (
@@ -117,13 +156,13 @@ const SearchMap = () => {
           {(() => {
             if (modalsOpenned.history) {
               return (
-                <Modal title="Recentes" label={`${historyStorage.length} de 20`} onClose={() => {
+                <Modal title="Recentes" label={`${historyStorage?.length} de 20`} onClose={() => {
                   setModalsOpenned({
                     ...modalsOpenned,
                     history: !modalsOpenned.history
                   })
                 }}>
-                  {historyStorage && historyStorage.length > 0 ? (
+                  {historyStorage && historyStorage?.length > 0 ? (
                     <ul>
                       {Array.from(historyStorage).reverse().map(({ search, address, id }: any, index: number) => {
                         return (
@@ -155,6 +194,12 @@ const SearchMap = () => {
                           </a>
                         )
                       })}
+                       <a
+                        className="clear"
+                        onClick={() => handleClearStorage("history")}
+                      >
+                        Limpar histórico de pesquisa
+                      </a>
                     </ul>
                   ) : (
                     <div className="warning">
@@ -171,8 +216,8 @@ const SearchMap = () => {
 
             if (modalsOpenned.bookmarks) {
               return (
-                <Modal title="Salvos" label={`${bookmarksStorage.length} de 20`}>
-                  {bookmarksStorage && bookmarksStorage.length > 0 ? (
+                <Modal title="Salvos" label={`${bookmarksStorage?.length} de 20`}>
+                  {bookmarksStorage && bookmarksStorage?.length > 0 ? (
                     <ul>
                       {Array.from(bookmarksStorage).reverse().map(({ search, address, id }: any, index: number) => {
                         return (
@@ -204,6 +249,12 @@ const SearchMap = () => {
                           </a>
                         )
                       })}
+                      <a
+                        className="clear"
+                        onClick={() => handleClearStorage("bookmark")}
+                      >
+                        Limpar histórico de salvos
+                      </a>
                     </ul>
                   ) : (
                     <div className="warning">
@@ -241,6 +292,13 @@ const SearchMap = () => {
                 }
               }
 
+              function handleDeleteLocalStorage () {
+                localStorage.removeItem("geolocation-history");
+                localStorage.removeItem("geolocation-bookmark");
+
+                return alert("Conteúdo armazenado sobre seus dados de navegação, foram deletados com sucesso!");
+              }
+
               return (
                 <Modal title="Personalizar" right>
                   <div className="theme-switcher">
@@ -259,6 +317,16 @@ const SearchMap = () => {
                     >
                       <Sun />
                       <p>Claro</p>
+                    </button>
+                  </div>
+
+                  <div>
+                    <button
+                      id="theme-switcher-btn-dark"
+                      onClick={handleDeleteLocalStorage}
+                    >
+                      <TrashSimple />
+                      <p>Excluir conteúdo</p>
                     </button>
                   </div>
                 </Modal>
@@ -337,6 +405,7 @@ const SearchMap = () => {
               required
               ref={inputRef}
               value={search}
+              disabled={searchButtonLoading ? true : false}
               onInput={(e: ChangeEvent<HTMLInputElement>) => e.target.setCustomValidity('')}
               onInvalid={(e: ChangeEvent<HTMLInputElement>) => e.target.setCustomValidity('Por favor, preencha uma localização.')}
               onChange={(e: ChangeEvent<HTMLInputElement>) => {

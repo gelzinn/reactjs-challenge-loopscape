@@ -20,7 +20,6 @@ export const ModalWrapper = styled.div<ModalProps>`
   ${(props) => (props.right ? "right: 0;" : "left: 0;")};
 
   z-index: 11;
-  overflow: auto;
 
   .title {
     display: flex;
@@ -73,10 +72,13 @@ export const ModalWrapper = styled.div<ModalProps>`
     width: 100%;
     height: 100%;
 
-    padding: 1rem;
-    
     gap: 1rem;
+    padding: 1rem;
+
     list-style-type: none;
+
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
 
     > a {
       display: flex;
