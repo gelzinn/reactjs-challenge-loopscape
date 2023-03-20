@@ -17,7 +17,7 @@ const SearchMap = () => {
   const [searchButtonLoading, setSearchButtonLoading] = useState<boolean>(false);
   
   const [historyStorage, setHistoryStorage] = useState<any>(initialLocalStorageHistory)
-  const [bookmarksStorage, setBookmarksStorage] = useState<any>(initialLocalStorageBookmark)
+  const [bookmarkStorage, setBookmarkStorage] = useState<any>(initialLocalStorageBookmark)
 
   const [modalsOpenned, setModalsOpenned] = useState({
     history: false,
@@ -41,9 +41,9 @@ const SearchMap = () => {
 
     if (initialLocalStorageBookmark) {
       if (typeof initialLocalStorageBookmark === 'string') {
-        setBookmarksStorage(JSON.parse(initialLocalStorageBookmark) as string);
+        setBookmarkStorage(JSON.parse(initialLocalStorageBookmark) as string);
       } else {
-        setBookmarksStorage(initialLocalStorageBookmark as []);
+        setBookmarkStorage(initialLocalStorageBookmark as []);
       }
     }
   }, [])
@@ -55,10 +55,10 @@ const SearchMap = () => {
   }, [historyStorage])
 
   useEffect(() => {
-    if (bookmarksStorage) {
-      localStorage.setItem("geolocation-bookmark", JSON.stringify(bookmarksStorage));
+    if (bookmarkStorage) {
+      localStorage.setItem("geolocation-bookmark", JSON.stringify(bookmarkStorage));
     }
-  }, [bookmarksStorage])
+  }, [bookmarkStorage])
 
   useEffect(() => {
     if (!searchError) return
@@ -120,13 +120,13 @@ const SearchMap = () => {
   }
 
   function handleSaveLocation (id: string) {
-    if (!recentSearch || !bookmarksStorage) return;
+    if (!recentSearch || !bookmarkStorage) return;
 
-    if (bookmarksStorage.some((bookmark: any) => bookmark.id === recentSearch.id)) {
-      setBookmarksStorage(bookmarksStorage?.filter((item: any) => item.id != id));
+    if (bookmarkStorage.some((bookmark: any) => bookmark.id === recentSearch.id)) {
+      setBookmarkStorage(bookmarkStorage?.filter((item: any) => item.id != id));
       return;
     } else {
-      setBookmarksStorage([...bookmarksStorage, recentSearch]);
+      setBookmarkStorage([...bookmarkStorage, recentSearch]);
       return;
     }
   }
@@ -141,14 +141,14 @@ const SearchMap = () => {
       case "bookmark":
         if (!initialLocalStorageBookmark) return;
 
-        setBookmarksStorage([]);
-        localStorage.deleteItem("geolocation-bookmark")
+        setBookmarkStorage([]);
+        localStorage.removeItem("geolocation-bookmark")
         break;
       case "history":
         if (!initialLocalStorageHistory) return;
 
         setHistoryStorage([]);
-        localStorage.deleteItem("geolocation-history")
+        localStorage.removeItem("geolocation-history")
         break;
     }
   }
@@ -220,10 +220,10 @@ const SearchMap = () => {
 
             if (modalsOpenned.bookmarks) {
               return (
-                <Modal title="Salvos" label={`${bookmarksStorage?.length} de 20`}>
-                  {bookmarksStorage && bookmarksStorage?.length > 0 ? (
+                <Modal title="Salvos" label={`${bookmarkStorage?.length} de 20`}>
+                  {bookmarkStorage && bookmarkStorage?.length > 0 ? (
                     <ul>
-                      {Array.from(bookmarksStorage).reverse().map(({ search, address, id }: any, index: number) => {
+                      {Array.from(bookmarkStorage).reverse().map(({ search, address, id }: any, index: number) => {
                         return (
                           <a
                             key={id}
@@ -246,7 +246,7 @@ const SearchMap = () => {
                             </div>
                             <button onClick={(e) => {
                               e.stopPropagation(); 
-                              setBookmarksStorage(bookmarksStorage.filter((item: any) => item.id != id))
+                              setBookmarkStorage(bookmarkStorage.filter((item: any) => item.id != id))
                             }}>
                               <X />
                             </button>
@@ -277,6 +277,14 @@ const SearchMap = () => {
               const body = document.querySelector("body");
               const getTheme = body?.getAttribute("data-theme");
 
+              function handleCheckExistentLocalStorage() {
+                if (historyStorage || bookmarkStorage) {
+                  return true;
+                } else {
+                  return false;
+                }
+              }
+
               function handleThemeSwitcher (themeButton: string) {
                 const darkThemeButton = document.querySelector("#theme-switcher-btn-dark");
                 const lightThemeButton = document.querySelector("#theme-switcher-btn-light");
@@ -297,14 +305,19 @@ const SearchMap = () => {
               }
 
               function handleDeleteLocalStorage () {
-                localStorage.removeItem("geolocation-history");
-                localStorage.removeItem("geolocation-bookmark");
+                try {
+                  handleClearStorage("bookmark");
+                  handleClearStorage("history");
 
-                return alert("Conteúdo armazenado sobre seus dados de navegação, foram deletados com sucesso!");
+                  return alert("Conteúdo armazenado sobre seus dados de navegação, foram deletados com sucesso!");
+                } catch (error) {
+                  return console.log(error);
+                }
               }
 
               return (
                 <Modal title="Personalizar" right>
+                  <span className="subtitle">Temas</span>
                   <div className="theme-switcher">
                     <button
                       id="theme-switcher-btn-dark"
@@ -323,10 +336,11 @@ const SearchMap = () => {
                       <p>Claro</p>
                     </button>
                   </div>
-
+                  <span className="subtitle">Armazenamento</span>
                   <div>
                     <button
                       id="theme-switcher-btn-dark"
+                      disabled={handleCheckExistentLocalStorage() ? false : true}
                       onClick={handleDeleteLocalStorage}
                     >
                       <TrashSimple />
@@ -368,7 +382,7 @@ const SearchMap = () => {
                 handleSaveLocation(recentSearch.id)
               }}
             >
-              {bookmarksStorage.some((bookmark: any) => bookmark.id === recentSearch.id) ? <Heart weight="fill" /> : <Heart />}
+              {bookmarkStorage.some((bookmark: any) => bookmark.id === recentSearch.id) ? <Heart weight="fill" /> : <Heart />}
             </button>
           </div>
         )}

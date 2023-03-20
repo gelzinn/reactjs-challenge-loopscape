@@ -70,7 +70,7 @@ const GlobalStyle = createGlobalStyle`
       --gray-100: #121214;
       --black: black;
 
-      --red: green;
+      --red: #FF2D2D;
     }
   }
 `;

@@ -21,7 +21,7 @@ export const ModalWrapper = styled.div<ModalProps>`
 
   z-index: 11;
 
-  .title {
+  > .title {
     display: flex;
     flex-direction: row;
     align-items: flex-start;
@@ -60,6 +60,15 @@ export const ModalWrapper = styled.div<ModalProps>`
         border-radius: 9999px;
       }
     }
+  }
+
+  > .subtitle {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 1rem;
+
+    width: 100%;
   }
 
   > ul {
@@ -179,7 +188,7 @@ export const ModalWrapper = styled.div<ModalProps>`
         }
       }
 
-      &:hover {
+      &:not(.clear):hover {
         outline: 2px solid var(--gray-400);
 
         .info {
@@ -190,6 +199,18 @@ export const ModalWrapper = styled.div<ModalProps>`
           p {
             color: var(--gray-400);
           }
+        }
+      }
+
+      &.clear {
+        justify-content: center;
+        text-align: center;
+
+        border: none;
+
+        &:hover {
+          outline: 2px solid var(--red);
+          color: var(--red);
         }
       }
     }
@@ -221,16 +242,55 @@ export const ModalWrapper = styled.div<ModalProps>`
     }
   }
 
-  .theme-switcher {
+  > div:not(.title, .subtitle) {
     display: flex;
     align-items: center;
     justify-content: center;
 
     width: 100%;
+    
     padding: 0 1rem;
-    /* gap: .25rem; */
+    margin-bottom: 1rem;
 
     overflow: hidden;
+
+    &.theme-switcher {
+      > button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        gap: 1rem;
+
+        width: 100%;
+        min-height: 50px;
+        height: 100%;
+        max-height: 50px;
+
+        background: var(--gray-700);
+        color: var(--gray-100);
+        border: unset;
+
+        cursor: pointer;
+
+        &.selected {
+          background: var(--gray-500);
+        }
+
+        &:first-child {
+          border-radius: 1rem 0 0 1rem;
+        }
+
+        &:last-child {
+          border-radius: 0 1rem 1rem 0;
+        }
+
+        > svg {
+          width: 1.5rem;
+          height: 1.5rem;
+        }
+      }
+    }
 
     > button {
       display: flex;
@@ -246,26 +306,25 @@ export const ModalWrapper = styled.div<ModalProps>`
 
       background: var(--gray-700);
       color: var(--gray-100);
+
+      border-radius: 1rem;
       border: unset;
 
       cursor: pointer;
-
-      &.selected {
-        background: var(--gray-500);
-      }
-
-      &:first-child {
-        border-radius: 1rem 0 0 1rem;
-      }
-
-      &:last-child {
-        border-radius: 0 1rem 1rem 0;
-      }
 
       > svg {
         width: 1.5rem;
         height: 1.5rem;
       }
+
+      &:disabled {
+        opacity: .5;
+        cursor: not-allowed;
+      }
+    }
+
+    &:last-child {
+      margin-bottom: unset;
     }
   }
 
